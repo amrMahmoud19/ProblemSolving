@@ -1,0 +1,36 @@
+import numpy as np
+
+
+# lis = np.zeros(100)
+# lis_arr = []
+
+
+def LIS(arr, index,lis):
+    
+    if index == 0:
+        lis[index]=1
+        # lis_arr.append(arr[index])
+    
+    if lis[index] !=0:
+        # return lis[index], lis_arr
+        return lis[index]
+    else:
+        if arr[index-1] < arr[index]:
+            # lis_val, lis_arr = LIS(arr,index-1)
+            lis[index] = LIS(arr,index-1,lis)+1
+            # lis_arr.append(arr[index])
+        else:
+            return LIS(arr, index-1, lis)
+    
+    return lis[index]
+
+def LIS_len(arr ):
+    lis = np.zeros(100)
+    index = len(arr)-1
+    return LIS(arr, index, lis)
+
+
+
+
+arr = [3, 10, 2, 1, 20]
+print(LIS_len(arr))
