@@ -1,3 +1,7 @@
+# after running the script using cmd please enter the required array size (n) in the terminal
+#  and then the output will be displayed in the terminal
+
+
 import numpy as np
 
 def solitaire(arr):
@@ -73,7 +77,7 @@ def solitaire(arr):
     # in case we reached a row with only on cell filled i.e. only one elemnt in the row with one
     sum=0
     final_index = -1
-    for z in range(len(cells[size-1])):
+    for z in range(2,len(cells[size-1])-2):
         sum+=cells[size-1][z]
         if cells[size-1][z] == 1:
             final_index = z
@@ -88,14 +92,24 @@ def solitaire(arr):
 
     # print("Output Array is: " )
     # print(cells[size-1][2:size+2])
-    return final_index-2
+    else:
+        return -1
 
 
 # calling our function and printing the resulting final peg location
-arr = np.array([1,1,1,1,1,1,1,1,0,1], np.int8)
-print("The input array is: ")
-print(arr)
-final_index= solitaire( arr)
-print("The single Remaning Peg index is: ")
-print(final_index)
+
+n = int(input())
+# arr = np.array([1,1,1,1,1,0,1,1,1,1], np.int8)
+
+for i in range(n):
+    arr = [1]*n
+    arr[i] = 0
+    print("The input array is: ")
+    print(arr)
+    final_index= solitaire( arr)
+    if(final_index == -1):
+        print("invalid starting state")
+    else:
+        print("The single Remaning Peg index is: ")
+        print(final_index)
 

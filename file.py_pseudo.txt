@@ -1,99 +1,133 @@
-
-DEFINE FUNCTION solitaire(arr):
-
-    SET size TO len(arr)
-    SET cells TO np.zeros((size,size+4), np.int8)
-    SET sum_arr TO 0
-    FOR i IN range(size):
-        sum_arr+=arr[i]
-
-    IF sum_arr != size-1 :
-        RETURN -1
-
-    IF size <= 2:
-        RETURN -1
-
-    IF size%2 != 0:
-        RETURN -1
-
-    IF arr[size-2]!=0 and arr[size-5] != 0:
-        RETURN -1
+IMPORT re
 
 
+
+DEFINE FUNCTION generateBoard(n):
+
+    RETURN [1]*n
+
+
+
+DEFINE FUNCTION solve(board):
+
+    IF checkBoard(board):
+
+        RETURN True
+
+    ELSEIF checkUnsolvable(board):
+
+        RETURN False
+
+
+
+    SET moves TO []
+
+    FOR i IN range(len(board)):
+
+        IF i < len(board)-2:
+
+            IF board[i] and board[i+1] and not board[i+2]:
+
+                moves.append((i, 'right'))
+
+        IF i > 1:
+
+            IF board[i] and board[i-1] and not board[i-2]:
+
+                moves.append((i, 'left'))
 
     
 
-    FOR x IN range (len(cells)):
-        SET cells[x][0] TO 0
-        SET cells[x][1] TO 0
-        SET cells[x][len(cells[x])-1] TO 0
-        SET cells[x][len(cells[x])-2] TO 0
+    FOR move IN moves:
 
-        FOR y IN range(2,len(cells[x])-2):
-            SET cells[x][y] TO -1
-            if(x==0):
-                SET cells[x][y] TO arr[y-2]
+        SET newBoard TO makeMove(board, move)
 
-    
+        IF solve(newBoard):
 
-    FOR i IN range(1,len(cells)):
-        SET no_ex TO 0                              
-        SET lim TO (i-1)//2                         
+            RETURN True
 
- 
+        continue
 
-        FOR z IN range(size+1, size+1-lim*2,-1):
-            cells[i][z]=cells[i-1][z]
 
-        FOR j IN range(size+1-lim*2,1,-1):
 
-            IF no_ex >= 3:
-
-                SET cells[i][j] TO cells[i-1][j]
-
-                continue
-
-            IF cells[i-1][j] EQUALS 1:
-
-                SET cells[i][j] TO int(not(bool(cells[i-1][j+1] EQUALS 1 and cells[i-1][j+2] EQUALS 0 and j<size) or bool(cells[i-1][j-1] EQUALS 1 and cells[i-1][j-2] EQUALS 0 and j>3 )or bool((bool(cells[i-1][j-1]) ^ bool(cells[i-1][j+1]))and j!=2 and j!=size+1)))
-
-            ELSE:
-
-                SET cells[i][j] TO int((cells[i-1][j-1]==1 and cells[i-1][j-2] EQUALS 1) or (cells[i-1][j+1]==1 and cells[i-1][j+2]==1))
-
- 
-            if(bool(cells[i][j]) ^ bool(cells[i-1][j])):
-
-                    no_ex+=1
-
-    sum=0
-    SET final_index TO -1
-
-    FOR z IN range(len(cells[size-1])):
-
-        sum+=cells[size-1][z]
-
-        IF cells[size-1][z] EQUALS 1:
-
-            SET final_index TO z
-
-    IF sum EQUALS 1:
-        OUTPUT(cells[size-1][2:size+2])
-
-        RETURN final_index-2
-
-    OUTPUT(cells)
-    RETURN final_index-2
+    RETURN False
 
 
 
 
 
+DEFINE FUNCTION makeMove(board, move):
+
+    SET index, direction TO move
+
+    SET b TO [element FOR element IN board]
+
+    IF direction EQUALS 'right':
+
+        SET b[index] TO 0
+
+        SET b[index+1] TO 0
+
+        SET b[index+2] TO 1
+
+    ELSEIF direction EQUALS 'left':
+
+        SET b[index] TO 0
+
+        SET b[index-1] TO 0
+
+        SET b[index-2] TO 1
+
+    RETURN b
 
 
-SET arr TO np.array([1,1,1,1,0,1], np.int8)
 
-final_index= solitaire( arr)
+DEFINE FUNCTION checkBoard(board):
 
-OUTPUT(final_index)
+    IF sum(board) EQUALS 1:
 
+        RETURN True
+
+    RETURN False
+
+
+
+DEFINE FUNCTION checkUnsolvable(board):
+
+    SET expression1 TO '1000+1' #RE FOR a proven to be unsolvable board
+
+    SET expression2 TO '00100'  #RE FOR a proven to be unsolvable board
+
+    SET string TO ''.join([str(element) FOR element IN board])
+
+    IF re.search(expression1, string) or re.search(expression2, string):
+
+        RETURN True
+
+    RETURN False
+
+
+
+DEFINE FUNCTION countSolutions(board):
+
+    SET indices TO []
+
+    FOR i IN range(len(board)):
+
+        SET b TO [element FOR element IN board]
+
+        SET b[i] TO 0
+
+        IF solve(b):
+
+            indices.append(i+1)
+
+    RETURN indices
+
+
+
+
+
+SET n TO int(INPUT())
+
+OUTPUT(countSolutions(generateBoard(n)))

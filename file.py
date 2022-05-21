@@ -1,81 +1,67 @@
-import numpy as np
+import re
 
-def solitaire(arr):
+def generateBoard(n):
+    return [1]*n
 
-    size = len(arr)
+def solve(board):
+    if checkBoard(board):
+        return True
+    elif checkUnsolvable(board):
+        return False
+
+    moves = []
+    for i in range(len(board)):
+        if i < len(board)-2:
+            if board[i] and board[i+1] and not board[i+2]:
+                moves.append((i, 'right'))
+        if i > 1:
+            if board[i] and board[i-1] and not board[i-2]:
+                moves.append((i, 'left'))
     
-    cells = np.zeros((size,size+4), np.int8)
-    sum_arr = 0
-    for i in range(size):
-        sum_arr+=arr[i]
+    for move in moves:
+        newBoard = makeMove(board, move)
+        if solve(newBoard):
+            return True
+        continue
 
-    if sum_arr != size-1 :
-        return -1
-
-    if size <= 2:
-        return -1
-    if size%2 != 0:
-        return -1
-    if arr[size-2]!=0 and arr[size-5] != 0:
-        return -1
-
-    
-    for x in range (len(cells)):
-        cells[x][0] = 0
-        cells[x][1] = 0
-        cells[x][len(cells[x])-1] = 0
-        cells[x][len(cells[x])-2] = 0
-    
-        for y in range(2,len(cells[x])-2):
-            cells[x][y] = -1
-            if(x==0):
-                cells[x][y] = arr[y-2]
-    
-    for i in range(1,len(cells)):
-        no_ex = 0                              
-        lim = (i-1)//2                         
-        
-
-       
-       
-        for z in range(size+1, size+1-lim*2,-1):
-            cells[i][z]=cells[i-1][z]
-
-        for j in range(size+1-lim*2,1,-1):
-
-            
-            if no_ex >= 3:
-                cells[i][j] = cells[i-1][j]
-                continue
-            
-            if cells[i-1][j] == 1:
-                
-                cells[i][j] = int(not(bool(cells[i-1][j+1] == 1 and cells[i-1][j+2] == 0 and j<size) or bool(cells[i-1][j-1] == 1 and cells[i-1][j-2] == 0 and j>3 )or bool((bool(cells[i-1][j-1]) ^ bool(cells[i-1][j+1]))and j!=2 and j!=size+1)))
-            
-            else:
-                
-                cells[i][j] = int((cells[i-1][j-1]==1 and cells[i-1][j-2] == 1) or (cells[i-1][j+1]==1 and cells[i-1][j+2]==1))
-            
-            if(bool(cells[i][j]) ^ bool(cells[i-1][j])):
-                    no_ex+=1
-    
-    sum=0
-    final_index = -1
-    for z in range(len(cells[size-1])):
-        sum+=cells[size-1][z]
-        if cells[size-1][z] == 1:
-            final_index = z
-    
-    
-    if sum == 1:
-        print(cells[size-1][2:size+2])
-        return final_index-2
-
-    print(cells)
-    return final_index-2
+    return False
 
 
+def makeMove(board, move):
+    index, direction = move
+    b = [element for element in board]
+    if direction == 'right':
+        b[index] = 0
+        b[index+1] = 0
+        b[index+2] = 1
+    elif direction == 'left':
+        b[index] = 0
+        b[index-1] = 0
+        b[index-2] = 1
+    return b
 
-arr = np.array([1,1,1,1,0,1], np.int8)
-final_index= solitaire( arr)
-print(final_index)
+def checkBoard(board):
+    if sum(board) == 1:
+        return True
+    return False
+
+def checkUnsolvable(board):
+    expression1 = '1000+1' #RE for a proven to be unsolvable board
+    expression2 = '00100'  #RE for a proven to be unsolvable board
+    string = ''.join([str(element) for element in board])
+    if re.search(expression1, string) or re.search(expression2, string):
+        return True
+    return False
+
+def countSolutions(board):
+    indices = []
+    for i in range(len(board)):
+        b = [element for element in board]
+        b[i] = 0
+        if solve(b):
+            indices.append(i+1)
+    return indices
+
+
+n = int(input())
+print(countSolutions(generateBoard(n)))
